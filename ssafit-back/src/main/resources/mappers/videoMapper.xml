@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.VideoDao">
+	<resultMap type="video" id="videoMap">
+		<result column="video_id" property="videoId" />
+		<result column="title" property="title" />
+		<result column="channel_id" property="channelId" />
+		<result column="channel_name" property="channelName" />
+		<result column="tag_name" property="tagName" />
+		<result column="view_cnt" property="viewCnt"/>
+	</resultMap>
+	
+	<select id="selectVideoList" resultMap="videoMap">
+		SELECT v.video_id, v.title, v.channel_id, c.channel_name, t.tag_name, v.view_cnt
+		FROM video v
+		LEFT JOIN channel c ON v.channel_id = c.channel_id
+		LEFT JOIN tag_has_video t ON v.video_id = t.video_id
+		ORDER BY v.view_cnt DESC
+	</select>
+	
+<!-- 	<select id="selectVideoListByTag" resultMap="videoMap" parameterType="String">
+		SELECT v.video_id, v.title, v.channel_id, c.channel_name, t.tag_name, v.view_cnt
+		FROM video v
+		LEFT JOIN channel c ON v.channel_id = c.channel_id
+		LEFT JOIN tag_has_video t ON v.video_id = t.video_id
+		WHERE t.tag_name = #{tag}
+		OR v.title LIKE CONCAT('%', #{tag}, '%')
+		ORDER BY v.view_cnt DESC
+	</select> -->
+	<select id="selectVideoListByTag" resultType="java.util.HashMap" parameterType="String">
+		SELECT v.video_id, v.title, v.channel_id, c.channel_name, t.tag_name, v.view_cnt
+		FROM video v
+		LEFT JOIN channel c ON v.channel_id = c.channel_id
+		LEFT JOIN tag_has_video t ON v.video_id = t.video_id
+		WHERE t.tag_name = #{tag}
+		OR v.title LIKE CONCAT('%', #{tag}, '%')
+		ORDER BY v.view_cnt DESC
+	</select>
+	<select id="selectVideoListWithStatusByTag" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT v.video_id as 'videoId', v.title, v.channel_id as 'channelId', c.channel_name as 'channelName', t.tag_name as 'tagName', v.view_cnt as 'viewCnt',
+		    CASE WHEN sm.user_id IS NULL THEN FALSE ELSE TRUE END AS 'is_mark',
+		    CASE WHEN sf.user_id IS NULL THEN FALSE ELSE TRUE END AS 'is_follow'
+    		FROM video v
+				LEFT JOIN `channel` c ON v.channel_id = c.channel_id
+		        LEFT JOIN tag_has_video t ON v.video_id = t.video_id
+		        LEFT JOIN ( SELECT * FROM mark m WHERE m.user_id = #{ userId }) as sm
+					ON v.video_id = sm.video_id
+				LEFT JOIN ( SELECT * FROM follow f WHERE f.user_id = #{ userId }) as sf
+            		ON v.channel_id = sf.channel_id
+            WHERE t.tag_name = #{ searchText }
+				OR v.title LIKE CONCAT('%', #{ searchText }, '%')
+			ORDER BY v.view_cnt DESC
+	</select>
+	
+	<select id="selectVideoListByKeyword" resultMap="videoMap" parameterType="java.util.HashMap">
+		SELECT v.video_id, v.title, v.channel_id, c.channel_name, t.tag_name, v.view_cnt
+		FROM video v
+		LEFT JOIN channel c ON v.channel_id = c.channel_id
+		LEFT JOIN tag_has_video t ON v.video_id = t.video_id
+		WHERE t.tag_name = #{tag}
+		OR v.title LIKE CONCAT('%', #{tag}, '%')
+		<if test="start == -1">
+			<if test="cnt == -1">
+				ORDER BY v.view_cnt DESC
+			</if>
+		</if>
+		<if test="start == -1">
+			<if test="cnt != -1">
+				ORDER BY v.view_cnt DESC LIMIT #{cnt}
+			</if>
+		</if>
+		<if test="start != -1">
+			<if test="cnt != -1">
+				ORDER BY v.view_cnt DESC LIMIT #{start}, #{cnt}
+			</if>
+		</if>
+	</select>
+	
+	<select id="selectVideoOne" resultMap="videoMap" parameterType="String">
+		SELECT v.video_id, v.title, v.channel_id, c.channel_name, t.tag_name, v.view_cnt
+		FROM video v
+		LEFT JOIN channel c ON v.channel_id = c.channel_id
+		LEFT JOIN tag_has_video t ON v.video_id = t.video_id
+		WHERE t.video_id = #{videoId}
+	</select>
+	<select id="selectVideoOneWithStatus" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT v.video_id as videoId, v.title, v.channel_id as channelId, c.channel_name as channelName, t.tag_name as tagName, v.view_cnt as viewCnt,
+		CASE WHEN sm.user_id IS NULL THEN FALSE ELSE TRUE END AS 'is_mark',
+		CASE WHEN sf.user_id IS NULL THEN FALSE ELSE TRUE END AS 'is_follow'
+		FROM ( SELECT * FROM video WHERE video_id = #{ videoId }) as v
+		LEFT JOIN `channel` c ON v.channel_id = c.channel_id
+		LEFT JOIN `tag_has_video` t ON v.video_id = t.video_id
+		LEFT JOIN ( SELECT * FROM mark m WHERE m.user_id = #{ userId } ) as sm
+			ON v.video_id = sm.video_id
+		LEFT JOIN ( SELECT * FROM follow f WHERE f.user_id = #{ userId } ) as sf
+			ON v.channel_id = sf.channel_id;
+	</select>
+	
+	<update id="updateVideo" parameterType="video">
+		UPDATE video
+		SET	title = #{title},
+			channel_id = #{channelId},
+			view_cnt = #{viewCnt}
+		WHERE video_id = #{videoId}
+	</update>
+	
+	<select id="selectMarkListByUserId" resultMap="videoMap" parameterType="String">
+		SELECT mark.video_id, video.title, video.channel_id, channel.channel_name, tag_has_video.tag_name, video.view_cnt
+		FROM mark 
+		LEFT OUTER JOIN user ON mark.user_id = user.user_id
+		LEFT OUTER JOIN video ON mark.video_id = video.video_id
+        LEFT OUTER JOIN channel ON video.channel_id = channel.channel_id
+        LEFT OUTER JOIN tag_has_video ON mark.video_id = tag_has_video.video_id
+        WHERE mark.user_id = #{userId}
+	</select>
+	
+	<select id="selectMark" resultType="int" parameterType="java.util.HashMap">
+		SELECT count(*)
+		FROM (SELECT mark.user_id, mark.video_id
+				FROM mark 
+				LEFT OUTER JOIN user ON mark.user_id = user.user_id
+				LEFT OUTER JOIN video ON mark.video_id = video.video_id
+		        LEFT OUTER JOIN channel ON video.channel_id = channel.channel_id
+		        LEFT OUTER JOIN tag_has_video ON mark.video_id = tag_has_video.video_id) AS tmp
+        WHERE user_id = #{userId}
+        AND video_id = #{videoId}
+	</select>
+	
+	<insert id="insertMark" parameterType="java.util.HashMap">
+		INSERT 
+			INTO mark
+				(user_id, video_id)
+			VALUES
+				(#{userId}, #{videoId})
+	</insert>
+	
+	<delete id="deleteMark" parameterType="java.util.HashMap">
+		DELETE
+		FROM mark
+		WHERE video_id = #{videoId}
+		AND user_id = #{userId}
+	</delete>
+	
+	<select id="selectFollowListByUserId" resultMap="videoMap" parameterType="String">
+		SELECT video.video_id, video.title, video.channel_id, channel.channel_name, tag_has_video.tag_name, video.view_cnt
+		FROM follow 
+		LEFT OUTER JOIN user ON follow.user_id = user.user_id
+		LEFT OUTER JOIN channel ON follow.channel_id = channel.channel_id
+		LEFT OUTER JOIN video ON channel.channel_id = video.channel_id
+        LEFT OUTER JOIN tag_has_video ON video.video_id = tag_has_video.video_id
+		WHERE follow.user_id = #{userId}
+	</select>
+	
+	<select id="selectFollow" resultType="int" parameterType="java.util.HashMap">
+		SELECT count(*)
+		FROM (SELECT follow.user_id, follow.channel_id
+				FROM follow 
+				LEFT OUTER JOIN user ON follow.user_id = user.user_id
+				LEFT OUTER JOIN channel ON follow.channel_id = channel.channel_id
+				LEFT OUTER JOIN video ON channel.channel_id = video.channel_id
+		        LEFT OUTER JOIN tag_has_video ON video.video_id = tag_has_video.video_id) AS tmp
+        WHERE user_id = #{userId}
+        AND channel_id = #{channelId}
+	</select>
+	
+	<insert id="insertFollow" parameterType="java.util.HashMap">
+		INSERT 
+			INTO follow
+				(user_id, channel_id)
+			VALUES
+				(#{userId}, #{channelId})
+	</insert>
+	
+	<delete id="deleteFollow" parameterType="java.util.HashMap">
+		DELETE
+		FROM follow
+		WHERE channel_id = #{channelId}
+		AND user_id = #{userId}
+	</delete>
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.ScoreDao">
+	<resultMap type="score" id="scoreMap">
+		<result column="user_id" property="userId" />
+		<result column="area_name" property="areaName" />
+		<result column="class_num" property="classNum" />
+		<result column="score_upper" property="scoreUpper" />
+		<result column="score_lower" property="scoreLower" />
+		<result column="score_belly" property="scoreBelly" />
+		<result column="score_body" property="scoreBody" />
+		<result column="score" property="score"/>
+		<result column="no" property="no"/>
+	</resultMap>
+	
+	<select id="selectScoreList" resultMap="scoreMap">
+		SELECT @rownum := @rownum + 1 AS no, user_id, area_name, class_num, score_upper, score_lower, score_belly, score_body, (score_upper + score_lower + score_belly + score_body) as sum
+		FROM score, (SELECT @rownum :=0) AS r
+		ORDER BY sum DESC
+	</select>
+	
+	<select id="selectScoreListByArea" resultMap="scoreMap" parameterType="String">
+		SELECT @rownum := @rownum + 1 AS no, user_id, area_name, class_num, score_upper, score_lower, score_belly, score_body, (score_upper + score_lower + score_belly + score_body) as sum
+		FROM score, (SELECT @rownum :=0) AS r
+		WHERE area_name like #{areaName}
+		ORDER BY sum DESC
+	</select>
+	
+</mapper>

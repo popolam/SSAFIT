@@ -1,0 +1,83 @@
+<template>
+  <v-app id="inner-app">
+    <header-nav></header-nav>
+
+      <!-- 템플릿 -->
+      <!-- <v-btn
+        elevation="2"
+        @click="scrollUp"
+      >
+        버튼
+      </v-btn> -->
+
+
+      <v-container
+        fluid
+        id="scroll"
+        class="ma-0 pa-0 overflow-y-auto overflow-x-hidden"
+        style="height: 100vh; width: 100vw; background: red"
+      >
+        <v-row
+          v-scroll:#scroll-target="onScroll"
+          align="center"
+          justify="center"
+          id="scroll-content"
+        >
+          <test-form componentNum="0"></test-form>
+          <v-btn
+            elevation="2"
+            @click="scrollDown"
+          >
+            자 밑으로 가자
+          </v-btn>
+          <test-form componentNum="1"></test-form>
+          <test-form componentNum="2"></test-form>
+          <test-form componentNum="3"></test-form>
+          <v-btn
+            elevation="2"
+            @click="scrollUp"
+          >
+            자 위로 가자
+          </v-btn>
+        </v-row>
+      </v-container>
+
+  </v-app>
+</template>
+
+<script>
+import HeaderNav from '@/components/common/HeaderNav.vue';
+import TestForm from '@/components/test/TestForm.vue';
+
+export default {
+  name: 'TestView',
+  components: {
+    HeaderNav,
+    TestForm,
+  },
+  data: () => ({
+    offsetTop: 0,
+  }),
+  methods: {
+      onScroll (e) {
+        this.offsetTop = e.target.scrollTop
+      },
+      scrollUp () {
+        document.getElementById('scroll').scrollTop = 0;
+      },
+      scrollDown () {
+        document.getElementById('scroll').scrollTop = document.getElementById('scroll').scrollHeight;
+      },
+    },
+}
+</script>
+
+<style scoped>
+   #app {
+    height: 100vh;
+    overflow: auto;
+    margin:0;
+  }
+
+
+</style>

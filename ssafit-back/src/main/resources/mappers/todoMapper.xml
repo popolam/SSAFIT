@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.TodoDao">
+	<resultMap type="todo" id="todoMap">
+		<result column="todo_no" property="todoNo"/>
+		<result column="user_id" property="userId" />
+		<result column="todo_content" property="todoContent" />
+		<result column="todo_done" property="todoDone" />
+		<result column="todo_date" property="todoDate" />
+	</resultMap>
+	
+	<select id="selectTodoList" resultMap="todoMap" parameterType="java.util.HashMap">
+		SELECT todo_no, user_id, todo_content, todo_done, todo_date
+		FROM todo
+		WHERE user_id = #{userId}
+		AND todo_date = #{todoDate}
+	</select>
+	
+	<insert id="insertTodo" parameterType="todo">
+		INSERT
+			INTO todo
+				(user_id, todo_content, todo_date)
+			VALUES
+				(#{userId}, #{todoContent}, #{todoDate})
+	</insert>
+	
+	<delete id="deleteTodo" parameterType="int">
+		DELETE
+		FROM todo
+		WHERE todo_no = #{todoNo}
+	</delete>
+</mapper>

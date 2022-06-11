@@ -1,0 +1,252 @@
+<template>
+<v-app>
+  <!-- v-app-bar -->
+  <v-app-bar 
+    app
+    clipped-left
+    absolute
+    color="black"
+    elevate-on-scroll
+    elevation="24"
+    scroll-target="#scroll"
+  >
+    <router-link to="/">
+      <img :src="require('@/assets/logo.png')" alt="logo.png" style="height: 25px"/>
+    </router-link>
+    <v-spacer></v-spacer>
+
+    <div class="d-flex justify-center" style="width: 50vw">
+      <div class="d-flex flex-fill white rounded-pill justify-center align-content-center" style="height: 40px;">
+        <v-text-field
+          class="ml-5"
+          hide-details="auto"
+          v-model="searchText"
+          @keydown.enter="search"
+        ></v-text-field>
+        <v-icon class="mx-3" @click="search">search</v-icon>
+      </div>
+    </div>
+    <v-spacer></v-spacer>
+
+    <v-dialog v-model="dialog" width="500">
+      <!-- Activator -->
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn icon v-bind="attrs" v-on="on">
+          <v-icon class="white--text">login</v-icon>
+        </v-btn>
+      </template>
+
+      <!-- Dialog -->
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">
+          LOG IN
+        </v-card-title>
+
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="user.userId"
+                  label="ID"
+                  required
+                ></v-text-field>
+              </v-col>
+
+              <v-col cols="12">
+                <v-text-field
+                  v-model="user.password"
+                  label="password"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="gray darken-1"
+            text
+            @click="dialog = false"
+          >
+            Close
+          </v-btn>
+          <v-btn
+            color="red darken-1"
+            text
+            @click="login"
+          >
+            Sign Up
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="login"
+          >
+            Log In
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-btn icon v-if="isLogin" @click="logout">
+      <v-icon class="white--text">power_settings_new</v-icon>
+    </v-btn>
+  </v-app-bar>
+
+  <!-- v-navigation-drawer -->
+  <v-navigation-drawer
+    app
+    clipped
+    permanent
+    expand-on-hover
+    class="ma-0 pa-0"
+  >
+    <v-list>
+      <v-list-item link>
+        <v-list-item-avatar size="25px">
+          <v-img :src="require('@/assets/sampleUserPhoto.png')"></v-img>
+        </v-list-item-avatar>
+
+        <v-list-item-content>
+          <v-list-item-title class="text-h6">
+            {{ username }}
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            {{ email }}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
+
+    <v-divider></v-divider>
+
+    <v-list nav dense shaped>
+      <v-list-item-group color="#FFC400">
+        <v-list-item link :to="{ path: '/search/leaderboard'}">
+            <v-list-item-icon>
+              <v-icon>emoji_events</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Leaderboard</v-list-item-title>
+          </v-list-item>
+      </v-list-item-group>
+    </v-list>
+
+    <v-list nav dense shaped>
+      <v-list-group
+        :value="true"
+        prepend-icon="fitness_center"
+      >
+
+        <template v-slot:activator>
+          <v-list-item-title>Fitness</v-list-item-title>
+        </template>
+        <v-list-item-group color="#FFC400">
+          <v-list-item link :to="{ path: '/search/mypage'}">
+            <v-list-item-icon>
+              <v-icon>perm_identity</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>My Page</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item link :to="{ path: '/search/test'}">
+            <v-list-item-icon>
+              <v-icon>thumb_up_off_alt</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Today's recommendation</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item link :to="{ path: '/search/mark'}">
+            <v-list-item-icon>
+              <v-icon>bookmark_border</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Marked Video</v-list-item-title>
+          </v-list-item>
+
+          <v-list-item link :to="{ path: '/search/follow'}">
+            <v-list-item-icon>
+              <v-icon>favorite_border</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Followed Channel</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list-group>
+    </v-list>
+  </v-navigation-drawer>
+
+  <!-- v-main -->
+  <v-main
+    id="scroll"
+    class="overflow-y-auto white--text pl-16"
+  >
+    <v-container fluid>
+      <router-view></router-view>
+    </v-container>
+  </v-main>
+
+</v-app>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        isLogin: false,
+        dialog: false,
+        user: {
+            'areaName': '대전',
+            'classNum': 4,
+            'grade': 1,
+            'name': '정세한',
+            'nickname': '싸피맨',
+            'password': '',
+            'userId': ''
+        },
+        username: '정세한',
+        email: 'hany961031@naver.com',
+        searchText: '',
+      }
+    },
+    methods: {
+      search() {
+        const payload = {
+          searchText: this.searchText
+        };
+        this.$store.dispatch("getVideos", payload);
+        if(this.$router.currentRoute.fullPath == "/search"){
+          this.$router.go(this.$router.currentRoute);
+        }
+        else{
+          this.$router.push(`/search?q=${this.searchText}`);
+        }
+        
+      },
+      login() {
+        console.dir(this.$route.query)
+        this.$store.dispatch("userLogin", {
+          user: this.user,
+          call: this.$route.query.call,
+        });
+      },
+      logout() {
+        alert("logout");
+      },
+    },
+    created() {
+      this.searchText = this.$router.currentRoute.query.q;
+    }
+  }
+</script>
+
+<style scoped>
+  #scroll {
+    height: 100vh;
+    background-image: url("@/assets/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  } 
+</style>

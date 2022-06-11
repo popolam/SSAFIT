@@ -1,0 +1,80 @@
+<template>
+  <v-container class="test-container ma-0 pa-0" fluid>
+    <div class="d-flex flex-column justify-center white--text" style="height: 100%">
+      <div v-if="componentNum == 0" class="test-question">
+        <div><img :src="require('@/assets/logo.png')" alt="logo.png" style="height: 40px"/>의 빅데이터가</div>
+        <div>오늘의 운동을 추천해 드립니다.</div>
+
+        <v-btn-toggle 
+          tile
+          group
+          v-model="value"
+          class="mt-16 d-flex justify-center align-center"
+          color="#FF0066"
+        >
+          <v-btn v-for="(testBtn, index) in testBtns[0]" :key="index" class="ma-2 text-center">
+            <v-chip class="ma-2 text-center">{{ testBtn }}</v-chip>
+          </v-btn>
+        </v-btn-toggle>
+
+      </div>
+    </div>
+  </v-container>
+</template>
+
+<script>
+import background0 from '@/assets/background/background0.png';
+import background1 from '@/assets/background/background1.jpg';
+import background2 from '@/assets/background/background2.jpg';
+import background3 from '@/assets/background/background3.jpg';
+
+export default {
+  name: 'TestForm',
+  data() {
+    return {
+      value: null,
+      background: [
+        background0,
+        background1,
+        background2,
+        background3,
+      ],
+      testBtns: [
+        ['시작하기', '그만하기']
+      ]
+    }
+  },
+  props: {
+    componentNum : String,
+  },
+  methods: {
+    scrollDown() {
+      console.log("내려간다");
+      // document.getElementById('inner-app').scrollTop = document.getElementById('inner-app').scrollHeight;
+      document.html.scrollTop = document.html.scrollHeight;
+    }
+  },
+  // mounted() {
+  //   document.getElementsByClassName('test-container')[this.componentNum].style.backgroundImage = `url(${this.background[this.componentNum]})`;
+  // }
+}
+</script>
+
+<style scoped>
+  .test-container {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-image: url(${this.background[this.componentNum]});
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    text-align: center;
+  }
+
+  .test-question {
+    font-size: 34pt;
+    font-weight: bold;
+  }
+
+</style>

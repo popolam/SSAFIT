@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.SearchDao">
+	<resultMap type="search" id="searchMap">
+		<result column="no" property="no" />
+		<result column="keyword" property="keyword" />
+		<result column="cnt" property="cnt" />
+	</resultMap>
+	
+	<select id="selectSearchList" resultMap="searchMap">
+		SELECT @ROWNUM := @ROWNUM + 1 AS no, keyword, cnt
+		FROM search, (SELECT @ROWNUM := 0) r
+		ORDER BY cnt DESC LIMIT 10
+	</select>
+	
+	<select id="selectSearchByKeyword" resultMap="searchMap" parameterType="String">
+		SELECT keyword, cnt
+		FROM search
+		WHERE keyword = #{keyword}
+	</select>
+	
+	<update id="updateSearch" parameterType="search">
+		UPDATE search
+		SET cnt = #{cnt}
+		WHERE keyword = #{keyword}
+	</update>
+	
+	<insert id="insertSearch" parameterType="String">
+		INSERT INTO search (keyword)
+		VALUES (#{keyword})
+	</insert>
+</mapper>

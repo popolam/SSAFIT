@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.ReviewDao">
+	<resultMap type="review" id="reviewMap">
+		<result column="review_no" property="reviewNo" />
+		<result column="content" property="content" />
+		<result column="date" property="datetime" />
+		<result column="view_cnt" property="viewCnt" />
+		<result column="video_id" property="videoId" />
+		<result column="user_id" property="userId" />
+	</resultMap>
+	
+	<select id="selectReviewList" resultMap="reviewMap" parameterType="String">
+		SELECT review_no, content, date, video_id, user_id
+		FROM review
+		WHERE video_id = #{videoId}
+		ORDER BY review.review_no DESC
+	</select>
+	
+	<select id="selectReviewOne" resultMap="reviewMap" parameterType="int">
+		SELECT review_no, content, date, video_id, user_id
+		FROM review
+		WHERE review_no = #{reviewNo}
+	</select>
+	
+	<insert id="insertReview" parameterType="review">
+		INSERT INTO review
+		VALUES (0, #{content}, now(), #{videoId}, #{userId})
+	</insert>
+	
+	<delete id="deleteReview" parameterType="int">
+		DELETE
+		FROM review
+		WHERE review_no = #{reviewNo}
+	</delete>
+	
+	<update id="updateReview" parameterType="review">
+		UPDATE review
+		SET	content = #{content},
+			date = now()
+		WHERE review_no = #{reviewNo}
+	</update>
+<!-- 	<update id="updateReview" parameterType="review">
+		UPDATE review
+		SET	content = #{content},
+			date = now(),
+			video_id = #{videoId},
+			user_id = #{userId}
+		WHERE review_no = #{reviewNo}
+	</update> -->
+</mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.FigureDao">
+	<resultMap type="figure" id="figureMap">
+		<result column="user_id" property="userId" />
+		<result column="file_uri" property="fileUri" />
+		<result column="file_name" property="fileName" />
+	</resultMap>
+	
+	<select id="selectFigureOne" resultMap="figureMap" parameterType="String">
+		SELECT user_id, file_uri, file_name
+		FROM file
+		WHERE user_id = #{userId}
+	</select>
+	
+	<insert id="insertFigure" parameterType="String">
+		INSERT 
+			INTO file
+				(user_id)
+		VALUES (#{userId})
+	</insert>
+	
+	<update id="updateFigure" parameterType="figure">
+		UPDATE file
+		SET file_uri = #{fileUri},
+			file_name = #{fileName}
+		WHERE user_id = #{userId}
+	</update>
+</mapper>

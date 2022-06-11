@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ssafit.model.dao.MarkDao">
+	<resultMap type="mark" id="markMap">
+		<result column="user_id" property="userId" />
+		<result column="video_id" property="videoId" />
+		<result column="name" property="name" />
+		<result column="title" property="title" />
+	</resultMap>
+	
+	<select id="selectMarkListByUserId" resultMap="markMap" parameterType="String">
+		SELECT mark.user_id, mark.video_id, user.name, video.title
+		FROM mark
+		LEFT JOIN user ON mark.user_id = user.user_id
+		LEFT JOIN video ON mark.video_id = video.video_id
+		WHERE mark.user_id = #{userId}
+	</select>
+</mapper>

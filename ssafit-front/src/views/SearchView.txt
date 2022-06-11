@@ -1,0 +1,164 @@
+<template>
+  <v-card class="overflow-hidden">
+    <!-- nav bar -->
+    <v-app-bar
+      absolute
+      color="black"
+      elevate-on-scroll
+      elevation="24"
+      scroll-target="#scrolling-sheet"
+    >
+      <router-link to="/">
+        <img :src="require('@/assets/logo.png')" alt="logo.png" style="height: 20px"/>
+      </router-link>
+      <v-spacer></v-spacer>
+
+      <div class="d-flex justify-center" style="width: 50vw">
+        <div class="d-flex flex-fill white rounded-pill justify-center align-content-center" style="height: 40px;">
+          <v-text-field
+            class="ml-5"
+            label="운동 검색 결과만 나오는 중, 기능 추가 예정"
+            hide-details="auto"
+            v-model="searchWord"
+            @keydown.enter="search"
+          ></v-text-field>
+          <v-icon class="mx-3" @click="search">search</v-icon>
+        </div>
+      </div>
+
+      <v-spacer></v-spacer>
+
+      <div class="text-center">
+        <v-dialog
+          v-model="dialog"
+          width="500"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              icon
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon class="white--text">perm_identity</v-icon>
+            </v-btn>
+          </template>
+
+          <v-card>
+            <v-card-title class="text-h5 grey lighten-2">
+              LOG IN
+            </v-card-title>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      label="ID"
+                      required
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-col cols="12">
+                    <v-text-field
+                      label="Password"
+                      type="password"
+                      required
+                    ></v-text-field>
+                  </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="gray darken-1"
+            text
+            @click="dialog = false"
+          >
+            Close
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="login"
+          >
+            Login
+          </v-btn>
+        </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
+
+      <v-btn icon @click="logout">
+        <v-icon class="white--text">power_settings_new</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+
+    <!-- scrolling sheet -->
+    <v-sheet
+      id="scrolling-sheet"
+      class="overflow-y-auto white--text"
+    >
+      
+      <v-container fluid class="mt-15">
+        <v-row dense>
+          <v-col v-for="video in videos" :key=video.videoId lg="3" md="4" sm="6">
+            <search-card :video="video"></search-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-sheet>
+  </v-card>
+</template>
+
+<script>
+import {mapState} from 'vuex';
+import SearchCard from '../components/search/SearchCard.vue';
+
+export default {
+  name: 'SearchView',
+  data(){
+    return {
+      dialog: false,
+      searchWord: ''
+    }
+  },
+  components: {
+    SearchCard,
+  },
+  methods: {
+    search() {
+      const payload = {
+        searchWord: this.searchWord
+      }
+      this.$store.dispatch('getVideos', payload);
+    },
+    login() {
+      this.$data.dialog = false;
+    },
+    logout() {
+      alert("log out!");
+    },
+  },
+  computed: {
+    ...mapState([
+      "videos"
+    ])
+  },
+  created(){
+    this.$store.dispatch('getVideos');
+  }
+}
+</script>
+
+<style scoped>
+  #scrolling-sheet {
+    height: 100vh;
+    margin:0;
+    background-image: url("@/assets/background.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+  } 
+</style>
